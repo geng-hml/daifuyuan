@@ -1,0 +1,31 @@
+// app/api/chat/route.js
+
+import { NextResponse } from 'next/server';
+
+export async function POST(req) {
+  const { message } = await req.json();
+
+  if (!message) {
+    return NextResponse.json({ error: 'Message is required' }, { status: 400 });
+  }
+
+  // ????? Access Token ?? Coze API
+  const accessToken = process.env.NEXT_PUBLIC_ACCESS_TOKEN;
+
+  const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/v1/bot/chat?bot_id=${process.env.NEXT_PUBLIC_BOT_ID}`, {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${accessToken}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ message }),
+  });
+
+  const data = await response.json();
+
+  if (response.ok) {
+    return NextResponse.json({ response: data.reply });
+  } else {
+    return NextResponse.json({ error: 'Failed to get response from bot' }, { status: 500 });
+  }
+}

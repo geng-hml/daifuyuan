@@ -1,0 +1,33 @@
+// /app/api/getAccessToken/route.js
+import { NextResponse } from 'next/server';
+
+export async function POST(request) {
+  const { code } = await request.json();
+
+  if (!code) {
+    return NextResponse.json({ error: 'No authorization code provided' });
+  }
+
+  // ??????? Access Token
+  const tokenResponse = await fetch('https://api.coze.cn/api/permission/oauth2/token', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer Ubth7Xo1iOGx85qbp2d64UhWr5TyTXR4Z9iZE3rX8Gdrxcpt`, // ?????????????
+    },
+    body: JSON.stringify({
+      grant_type: 'authorization_code',
+      code,
+      client_id: process.env.NEXT_PUBLIC_CLIENT_ID,
+      redirect_uri: 'https://shuaige-khaki.vercel.app/', // ????????? URI
+    }),
+  });
+
+  const tokenData = await tokenResponse.json();
+
+  if (tokenData.error) {
+    return NextResponse.json({ error: tokenData.error_description });
+  }
+
+  return NextResponse.json({ accessToken: tokenData.access_token });
+}

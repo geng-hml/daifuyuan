@@ -1,0 +1,15 @@
+// /app/api/oauth/redirect/route.js
+
+import { NextResponse } from 'next/server';
+
+export async function GET() {
+  const clientId = process.env.NEXT_PUBLIC_CLIENT_ID;
+  const redirectUri = 'https://your-vercel-app.com/api/oauth/callback'; // Vercel ????? URI
+  const state = 'random_state_string'; // ?? CSRF ????????
+
+  // ?? OAuth ?? URL
+  const authorizationUrl = `https://www.coze.cn/api/permission/oauth2/authorize?response_type=code&client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri)}&state=${state}`;
+
+  // 302 ?????????
+  return NextResponse.redirect(authorizationUrl);
+}

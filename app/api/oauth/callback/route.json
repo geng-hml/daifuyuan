@@ -1,0 +1,38 @@
+// app/api/oauth/callback/route.js
+
+import { NextResponse } from 'next/server';
+
+export async function GET(req) {
+  const { searchParams } = new URL(req.url);
+  const code = searchParams.get('code');
+
+  if (!code) {
+    return NextResponse.json({ error: 'Authorization code is missing' }, { status: 400 });
+  }
+
+  // ??????? Access Token
+  const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/permission/oauth2/token`, {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${process.env.NEXT_PUBLIC_CLIENT_SECRET}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      grant_type: 'authorization_code',
+      code,
+      client_id: process.env.NEXT_PUBLIC_CLIENT_ID,
+      redirect_uri: process.env.NEXT_PUBLIC_REDIRECT_URI,
+    }),
+  });
+
+  const data = await response.json();
+
+  if (data.access_token) {
+    // ????? access_token ??????????????????????????
+    process.env.NEXT_PUBLIC_ACCESS_TOKEN = data.access_token;
+
+    return NextResponse.json({ success: true, token: data.access_token });
+  } else {
+    return NextResponse.json({ error: 'Failed to get access token' }, { status: 500 });
+  }
+}
